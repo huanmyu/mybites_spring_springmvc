@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app version="3.0"   
+    xmlns="http://java.sun.com/xml/ns/javaee"   
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"   
+    xsi:schemaLocation="http://java.sun.com/xml/ns/javaee   
+    http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd">
+	<!--应用名称-->
+	<display-name>MyBites</display-name>
+	<!-- 应用程序上下文参数,指定log4j日志框架使用的配置参数文件位置 -->
+	<context-param>
+		<param-name>log4jConfigLocation</param-name>
+		<param-value>classpath:log4j.properties</param-value>
+	</context-param> 
+	<!--加载所有的spring配置文件--> 
+	<context-param>
+		<param-name>contextConfigLocation</param-name>
+		<param-value> classpath:applicationContext.xml</param-value>
+	</context-param>
+	<!-- 采用监听器加载 -->
+	<listener>
+		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+	</listener> 
+	<!--servlet初始化参数，配置springmvc模块-->
+	<servlet>
+		<servlet-name>springmvc</servlet-name>
+		<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+		<!--初始化参数配置-->
+		<init-param>
+			<param-name>contextConfigLocation</param-name>
+			<param-value>classpath:springmvc-servlet.xml</param-value>
+		</init-param>
+		<load-on-startup>2</load-on-startup>
+	</servlet>
+	<!--spring的配置的映射-->
+	<servlet-mapping>
+		<servlet-name>springmvc</servlet-name>
+		 <!--拦截所有URL-->  
+		<url-pattern>/</url-pattern>
+	</servlet-mapping>
+	<!--配置session存在时间-->
+	<session-config>
+		<session-timeout>60</session-timeout>
+	</session-config>
+	<!--中文编码过滤器配置-->
+	<filter>
+		<filter-name>encodingFilter</filter-name>
+		<filter-class> org.springframework.web.filter.CharacterEncodingFilter</filter-class>
+		<init-param>
+			<param-name>encoding</param-name>
+			<param-value>UTF-8</param-value>
+		</init-param>
+		<init-param>   
+        <param-name>forceEncoding</param-name>   
+        <param-value>true</param-value>   
+        </init-param>   
+	</filter>
+	<!--中文编码过滤器配置映射-->
+	<filter-mapping>
+		<filter-name>encodingFilter</filter-name>
+		<url-pattern>/*</url-pattern>
+	</filter-mapping>
+	<!--以下配置的作用是 强行指定浏览器以utf-8编码格式打开HTM和HTML--> 
+	<mime-mapping>
+		<extension>html</extension>
+		<mime-type>text/html;charset=utf-8</mime-type>
+	</mime-mapping>
+	<!--默认访问的页面-->
+	<welcome-file-list>
+		<welcome-file>index.html</welcome-file>
+	</welcome-file-list>
+	<!--异常跳转页面-->
+	<error-page>
+		<exception-type>java.lang.Exception</exception-type>
+		<location>/WEB-INF/jsp/error.jsp</location>
+	</error-page>
+</web-app>  

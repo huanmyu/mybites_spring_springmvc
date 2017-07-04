@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"  
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"  
+    xmlns:mvc="http://www.springframework.org/schema/mvc"  
+    xmlns:context="http://www.springframework.org/schema/context"  
+    xmlns:aop="http://www.springframework.org/schema/aop"   
+    xmlns:tx="http://www.springframework.org/schema/tx"  
+    xsi:schemaLocation="  
+        http://www.springframework.org/schema/beans   
+        http://www.springframework.org/schema/beans/spring-beans-4.3.xsd  
+        http://www.springframework.org/schema/mvc   
+        http://www.springframework.org/schema/mvc/spring-mvc-4.3.xsd  
+        http://www.springframework.org/schema/context   
+        http://www.springframework.org/schema/context/spring-context-4.3.xsd  
+        http://www.springframework.org/schema/tx  
+        http://www.springframework.org/schema/tx/spring-tx-4.3.xsd  
+      http://www.springframework.org/schema/aop  
+      http://www.springframework.org/schema/aop/spring-aop-4.3.xsd"  default-autowire="byName">  
+  <!--spring框架的核心配置-->
+  <!--自动扫描包-->
+  <context:component-scan base-package="com.bowen"></context:component-scan>
+  <!-- 启动spring注解,当自动扫描启动后,该配置可以去掉   
+  <context:annotation-config /> -->
+   <!-- 启动spring注解,等同于 context:annotation-config  
+  <bean class="org.springframework.context.annotation.CommonAnnotationBeanPostProcessor"/>  
+  <bean class="org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor"/>  
+  <bean class="org.springframework.beans.factory.annotation.PersistenceAnnotationBeanPostProcessor"/>  
+  <bean class="org.springframework.beans.factory.annotation.RequiredAnnotationBeanPostProcessor"/> --> 
+   <!--配置数据源属性文件--> 
+   <bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+   	<property name="locations">
+   		<list>
+   			<value>jdbc.properties</value>
+   		</list>
+   	</property>
+   </bean>
+    <!--配置数据源--> 
+   <bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource">
+   	<property name="driverClassName" value="${driver}"></property>
+    <property name="url" value="${url}"></property>
+   	<property name="username" value="${username}"></property>
+   	<property name="password" value="${password}"></property>
+   </bean>
+  <!-- 配置SqlMapClient对象 -->  
+  <bean id="sqlMapClient" class="org.springframework.orm.ibatis.SqlMapClientFactoryBean">
+  	<property name="configLocation" value="classpath:sqlMapConfig.xml"></property>
+  	<!--注入数据源配置-->
+  	<property name="dataSource" ref="dataSource"/>  
+  </bean>
+  <!--根据sqlMapClien创建一个SqlMapClient模版类-->
+  <bean id="sqlMapClientTemplate" class="org.springframework.orm.ibatis.SqlMapClientTemplate">
+  	<!--注入SqlMapClient对象-->
+  	<property name="sqlMapClient" ref="sqlMapClient"></property>
+  </bean>
+   <!-- 启动spring事务注解，事务注解尽在此 -->
+   <!-- 数据库连接池 -->
+   <!-- 事务管理  -->  
+  <bean name="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">  
+    <property name="dataSource" ref="dataSource" />  
+  </bean>  
+   <!-- 事物管理-->
+   <tx:annotation-driven transaction-manager="transactionManager"/>
+   <!-- 配置事务特性   
+   <tx:advice id="txAdvice" transaction-manager="transactionManager">  
+    <tx:attributes>  
+        <tx:method name="select*" read-only="true" propagation="REQUIRED"/>  
+        <tx:method name="find*" read-only="true" propagation="REQUIRED"/>  
+        <tx:method name="save*" propagation="REQUIRED" isolation="REPEATABLE_READ"/>  
+        <tx:method name="update*" propagation="REQUIRED" isolation="REPEATABLE_READ"/>  
+        <tx:method name="add*" propagation="REQUIRED" isolation="REPEATABLE_READ"/>  
+        <tx:method name="delete*" propagation="REQUIRED" isolation="REPEATABLE_READ"/>  
+        <tx:method name="*" read-only="true"/>  
+    </tx:attributes>  
+  </tx:advice> --> 
+  <!-- 配置事务代理拦截器     
+  <bean id="baseTransactionProxy" abstract="true"   
+    class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">  
+    <property name="transactionManager">  
+      <ref bean="transactionManager"/>  
+    </property>  
+    <property name="transactionAttributes">  
+      <props>  
+        <prop key="insert*">PROPAGATION_REQUIRED</prop>  
+        <prop key="update*">PROPAGATION_REQUIRED</prop>  
+        <prop key="delete*">PROPAGATION_REQUIRED</prop>  
+        <prop key="*">PROPAGATION_REQUIRED,readOnly</prop>      
+      </props>     
+    </property>  
+  </bean> -->
+   <!-- 配置哪些类的方法需要进行事务管理   
+  <aop:config>  
+    <aop:pointcut id="baseServiceMethods" expression="execution(* com.archie.service.*.*(..))"/>  
+      <aop:advisor advice-ref="txAdvice" pointcut-ref="baseServiceMethods"/>  
+    </aop:config>  
+  <aop:aspectj-autoproxy /> --> 
+   <!-- 配置Dao实例-->   
+ <!-- <bean id="userDao" class="com.bowen.dao.UserDao">  
+    <property name="sqlMapClient" ref="sqlMapClient"/>     
+  </bean>-->
+    
+  <!-- 配置Service实例   
+  <bean id="userService" class="com.bowen.service.UserService">  
+    <property name="userDao" ref="userDao"/>  
+  </bean> -->  
+    
+  <!-- 添加了事务的管理类    
+  <bean id="userManager" parent="baseTransactionProxy">     
+    <property name="target">      
+      <bean class="com.bowen.service.UserService"/>  
+    </property>    
+  </bean> -->     
+</beans>
